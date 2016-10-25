@@ -32,6 +32,10 @@ class FuzzyNumber
     @polyline.map{|x|x[0]}
   end
   
+  def get_polyline
+    @polyline
+  end
+  
   def prep_scale( *numbers )
     n = numbers.size 
     scale = ( numbers.inject([]){ |sum, s| sum + s.get_scale } ).uniq.sort
@@ -77,5 +81,37 @@ class FuzzyNumber
   
   def <=(other)
     other>=self
+  end
+  
+  # draft 
+  def general_operation(n1,n2,operation)
+    scale = prep_scale(n1,n2)
+    pp = []
+    scale.each do |x1|
+      scale.each do |x2|
+        x = case operation
+              when '*' then x1*x2
+              when '+' then x1+x2
+              when '-' then x1-x2
+              when '/' then x1/x2
+            end
+        pp << [x, [n1.get_membership(x1),n2.get_membership(x2)].min]
+      end
+    end
+    scale = pp.collect{|p| p[0]}.uniq.sort
+    scale.collect{|s| [s, pp.select{|x| x[0]==s}.collect{|x| x[1]}.max] }
+  end
+  
+  def *(other)
+    general_operation(self,other,'*')
+  end
+  def +(other)
+    general_operation(self,other,'+')
+  end
+  def -(other)
+    general_operation(self,other,'*')
+  end
+  def /(other)
+    general_operation(self,other,'/')
   end
 end
