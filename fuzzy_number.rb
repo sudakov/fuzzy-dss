@@ -27,6 +27,7 @@ class FuzzyNumber
         return (a * x + b).round(5)
       end
     end
+    puts "error #{x}"
   end
   def get_scale
     @polyline.map{|x|x[0]}
@@ -60,7 +61,8 @@ class FuzzyNumber
         old_x = x
         old_ys = ys
     end
-    (scale + scale_add).uniq.sort
+    scale = (scale + scale_add).uniq.sort
+    scale.map!{|s| s.round(5)}
   end
   
   def ==(other)
@@ -97,8 +99,11 @@ class FuzzyNumber
               when '-' then x1-x2
               when '/' then x1/x2
             end
+        x = x.round(5)
         pp << [x, [n1.get_membership(x1),n2.get_membership(x2)].min]
+        next if (operation == '/' and x == 0)
         a.step(b,((b-a)/1000.0).round(5)) do |s1|
+          next if (operation == '*' and s1 == 0)
           s2 = case operation
               when '*' then x / s1
               when '+' then x - s1
