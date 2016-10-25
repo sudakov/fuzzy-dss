@@ -1,7 +1,3 @@
-# fuzzy-dss
-Fuzzy sets, numbers, rules, logic for decision support systems
-
-```ruby
 require_relative 'fuzzy_number'
 
 num1 = FuzzyNumber.new([[0.48,0],[0.92,1],[1.32,0]]) # Triangular membership function
@@ -14,4 +10,3 @@ puts num1 <= num2
 
 num3 = FuzzyNumber.new([[1,0],[4.5,1],[5,1],[7,0]]) #Trapezoid membership function
 puts num1 >= num3 
-```

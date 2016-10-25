@@ -1,4 +1,3 @@
-# Класс нечетких чисел
 class FuzzyNumber
   
   def initialize(polyline)
@@ -34,24 +33,30 @@ class FuzzyNumber
   end
   
   def prep_scale( *numbers )
-    
+    n = numbers.size 
     scale = ( numbers.inject([]){ |sum, s| sum + s.get_scale } ).uniq.sort
-    starting_line = []
-    ending_line = []
-    started_line = []
+    ys = nil
+    old_ys = nil
+    old_x = nil
+    scale_add = []
     scale.each do |x|
-=begin
-      starting_line = []
-      numbers.each_with_index do |number, i|
-        j = number.get_scale.index(x)  
-        if j
-          starting_line << [i,j,number.get_membership(x)]
-          ending_line << [i,j,number.get_membership(x)] if started_line.index{|x| x[]}
+        ys=numbers.collect{ |num| num.get_membership(x) }
+        if old_ys
+          for i1 in (0...n)
+            for i2 in ((i1+1)...n)
+                if (old_ys[i1]>old_ys[i2] and ys[i1]<ys[i2]) or
+                   (old_ys[i1]<old_ys[i2] and ys[i1]>ys[i2])
+                  a1,b1 = get_line( [old_x,old_ys[i1]], [x,ys[i1]] )
+                  a2,b2 = get_line( [old_x,old_ys[i2]], [x,ys[i2]] )
+                  scale_add <<  (b2-b1) / (a1-a2)
+                end
+            end
+          end
         end
-      end
-      started_line = starting_line.clone
-=end
+        old_x = x
+        old_ys = ys
     end
+    (scale + scale_add).uniq.sort
   end
   
   def ==(other)
@@ -60,14 +65,17 @@ class FuzzyNumber
   end
   
   def >=(other)
-    prep_scale(self,other)
-    0.5
+    scale = prep_scale(self,other)
+    mu = []
+    scale.each do |x1|
+      scale.each do |x2|
+        mu << [self.get_membership(x1),other.get_membership(x2)].min if x1>=x2
+      end
+    end
+    mu.max
+  end
+  
+  def <=(other)
+    other>=self
   end
 end
-
-my_num1 = FuzzyNumber.new([[1,0],[2,1],[3,1],[4,0]])
-my_num2 = FuzzyNumber.new([[0.5,0],[2.5,1],[4.5,0]])
-
-puts my_num1.get_membership(1.5)
-puts my_num1 == my_num2
-puts my_num1 >= my_num2
