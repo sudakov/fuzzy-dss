@@ -4,14 +4,21 @@ Fuzzy sets, numbers, rules, logic for decision support systems
 ```ruby
 require_relative 'fuzzy_number'
 
-num1 = FuzzyNumber.new([[0.48,0],[0.92,1],[1.32,0]]) # Triangular membership function
-num2 = FuzzyNumber.new([[0.32,0],[0.76,1],[1.2,0]])  
+# You must pass membership function into consructor as polyline: [[x1, mu(x1)],[x2, mu(x2)]....]
 
-puts num1.get_membership(0.84)
+num1 = FuzzyNumber.new([[1,0],[2,1],[3.1,0]]) # Triangular membership function
+num2 = FuzzyNumber.new([[1.7,0],[3,1],[4,0]])
+
+puts num1.get_membership(1.5)
 puts num1 == num2
 puts num1 >= num2
 puts num1 <= num2
 
 num3 = FuzzyNumber.new([[1,0],[4.5,1],[5,1],[7,0]]) #Trapezoid membership function
-puts num1 >= num3 
+puts num1 >= num3
+
+puts num1 * num2
+puts num1 + num2
+puts num1 - num2
+puts num1 / num2
 ```

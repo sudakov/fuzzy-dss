@@ -24,7 +24,7 @@ class FuzzyNumber
         return point[1]
       elsif x.between?(point[0],@polyline[i+1][0])
         a,b = get_line( point, @polyline[i+1])
-        return a * x + b
+        return (a * x + b).round(5)
       end
     end
   end
@@ -86,6 +86,8 @@ class FuzzyNumber
   # draft 
   def general_operation(n1,n2,operation)
     scale = prep_scale(n1,n2)
+    a = n1.get_scale[0]
+    b = n1.get_scale[-1]
     pp = []
     scale.each do |x1|
       scale.each do |x2|
@@ -96,10 +98,19 @@ class FuzzyNumber
               when '/' then x1/x2
             end
         pp << [x, [n1.get_membership(x1),n2.get_membership(x2)].min]
+        a.step(b,((b-a)/1000.0).round(5)) do |s1|
+          s2 = case operation
+              when '*' then x / s1
+              when '+' then x - s1
+              when '-' then s1 - x       
+              when '/' then s1 / x   
+            end
+          pp << [x, [n1.get_membership(s1),n2.get_membership(s2)].min]
+        end
       end
     end
     scale = pp.collect{|p| p[0]}.uniq.sort
-    scale.collect{|s| [s, pp.select{|x| x[0]==s}.collect{|x| x[1]}.max] }
+    FuzzyNumber.new(scale.collect{|s| [s, pp.select{|x| x[0]==s}.collect{|x| x[1]}.max] })
   end
   
   def *(other)
@@ -109,9 +120,14 @@ class FuzzyNumber
     general_operation(self,other,'+')
   end
   def -(other)
-    general_operation(self,other,'*')
+    general_operation(self,other,'-')
   end
   def /(other)
     general_operation(self,other,'/')
+  end
+  
+  def to_s
+    @polyline.collect{|x| x[0]}.join("\t") + "\n" +
+    @polyline.collect{|x| x[1]}.join("\t")
   end
 end
