@@ -84,8 +84,7 @@ class FuzzyNumber
   def <=(other)
     other>=self
   end
-  
-  # draft 
+   
   def general_operation(n1,n2,operation)
     scale = prep_scale(n1,n2)
     a = n1.get_scale[0]
@@ -134,5 +133,31 @@ class FuzzyNumber
   def to_s
     @polyline.collect{|x| x[0]}.join("\t") + "\n" +
     @polyline.collect{|x| x[1]}.join("\t")
+  end
+  
+  def clip_membership( a )
+    FuzzyNumber.new(@polyline.map{|x| [x[0],[a,x[1]].min]})
+  end
+  
+  def get_max_membership
+    @polyline.map{|x| x[1]}.max
+  end
+  
+  def &(other)
+    scale = (self.get_scale + other.get_scale).uniq.sort
+    puts "scale"
+    p scale
+    polyline = scale.map{|x|[x,[self.get_membership(x),other.get_membership(x)].min]}
+    FuzzyNumber.new(polyline)
+  end
+  
+  def |(other)
+    scale = prep_scale(self,other)
+    polyline = scale.map{|x|[x,[self.get_membership(x),other.get_membership(x)].max]}
+    FuzzyNumber.new(polyline)    
+  end
+  
+  def defuzzification
+    1 # todo
   end
 end
