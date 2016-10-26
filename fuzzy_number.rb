@@ -144,9 +144,7 @@ class FuzzyNumber
   end
   
   def &(other)
-    scale = (self.get_scale + other.get_scale).uniq.sort
-    puts "scale"
-    p scale
+    scale = prep_scale(self,other)
     polyline = scale.map{|x|[x,[self.get_membership(x),other.get_membership(x)].min]}
     FuzzyNumber.new(polyline)
   end
@@ -158,6 +156,15 @@ class FuzzyNumber
   end
   
   def defuzzification
-    1 # todo
+    s1 = 0
+    s2 = 0
+    x = @polyline.map{|p| p[0]}
+    y = @polyline.map{|p| p[1]}
+    for i in (0...(@polyline.size-1))
+      a,b = get_line( @polyline[i], @polyline[i+1])
+      s1 += a*(x[i+1]**3-x[i]**3)/3.0 + b * (x[i+1]**2-x[i]**2)/2.0
+      s2 += 0.5 * (x[i+1]-x[i]) * (y[i+1]+y[i])
+    end
+    s1 / s2
   end
 end
