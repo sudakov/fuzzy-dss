@@ -22,3 +22,5 @@ puts num1 + num2
 puts num1 - num2
 puts num1 / num2
 ```
+
+The reported study was funded by RFBR according to the research project No 16-01-00571 A
