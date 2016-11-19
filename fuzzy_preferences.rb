@@ -56,7 +56,7 @@ file = %{
       "name": "generalized criterion",
       "scale": ["bad","good"],
       "rules": [
-        { "conditions": {"crit1": "about 1", "crit2": "about 1", "crit3":"green" },
+        { "conditions": {"crit1": "about 1", "crit2": "about 1", "crit3":["green","red"] },
           "result": "bad"
         },
         { "conditions": {"crit1": "about 2", "crit2": "from 1 to 3", "crit3":"red" },
@@ -67,8 +67,8 @@ file = %{
   ],
   "alternatives" : [
     {"crit1": 1.5, "crit2": 0.1, "crit3": "green"},
-    {"crit1": 4,   "crit2": 4,   "crit3": "red"},
-    {"crit1": 1,   "crit2": 1,   "crit3": "green"}
+    {"crit1": 2,   "crit2": 2,   "crit3": "red"},
+    {"crit1": 1,   "crit2": 1,   "crit3": "red"}
   ]
 }
 }
@@ -97,26 +97,41 @@ def get_fuzzy_value(h,v)
 end
 
 h["alternatives"].each do |a|
-  puts "a="
-  p a
   total_res = nil
   h["criterions"][3]["rules"].each do |r|
-    rule_strength = 0.0
-    puts "rule = "
-    p r
+    rule_strength = 1.0
+    #puts "rule = "
+    #p r
     r["conditions"].each do |crit,condition|
       fuzzy_value = get_fuzzy_value(h,a[crit])
-      fuzzy_cond  = get_fuzzy_value(h,condition) # to do loop
-      c = fuzzy_value & fuzzy_cond
-      rule_strength = [rule_strength, c.get_max_membership].min
+      if not condition.is_a? Array
+        condition=[condition]
+      end
+      cc = nil
+      condition.each do |cond|  
+        fuzzy_cond  = get_fuzzy_value(h,cond) 
+        c = fuzzy_value & fuzzy_cond
+        if cc.nil?
+            cc = c
+        else
+            cc = cc | c
+        end
+        # puts "c=#{c}"
+      end
+      rule_strength = [rule_strength, cc.get_max_membership].min
+      #puts "rule_strength = #{rule_strength}"
     end
     rule_res = get_fuzzy_value(h,r["result"]).clip_membership(rule_strength)
+    #puts "rule_res = #{rule_res}"
     if total_res.nil?
       total_res = rule_res
     else
       total_res = total_res | rule_res
     end
   end
+  puts "a="
+  p a
+  puts "total_res = #{total_res}"
   res = total_res.defuzzification
   puts "#{res}"
 end
