@@ -1,5 +1,6 @@
 # The reported study was funded by RFBR according to the research project No 16-01-00571 A
 require_relative 'fuzzy_number'
+require_relative 'fuzzy_set'
 require 'json'
 
 file = %{
@@ -55,10 +56,10 @@ file = %{
       "name": "generalized criterion",
       "scale": ["bad","good"],
       "rules": [
-        { "conditions": {"crit1": "about 1", "crit2": "about 1", "crit3":["green","red"] },
+        { "conditions": {"crit1": "about 1", "crit2": "about 1", "crit3":"green" },
           "result": "bad"
         },
-        { "conditions": {"crit1": "about 2", "crit2": "from 1 to 3", "crit3":["red"] },
+        { "conditions": {"crit1": "about 2", "crit2": "from 1 to 3", "crit3":"red" },
           "result": "good"
         }
       ]
@@ -96,9 +97,13 @@ def get_fuzzy_value(h,v)
 end
 
 h["alternatives"].each do |a|
+  puts "a="
+  p a
   total_res = nil
   h["criterions"][3]["rules"].each do |r|
-    rule_strength = 0
+    rule_strength = 0.0
+    puts "rule = "
+    p r
     r["conditions"].each do |crit,condition|
       fuzzy_value = get_fuzzy_value(h,a[crit])
       fuzzy_cond  = get_fuzzy_value(h,condition) # to do loop
