@@ -74,3 +74,45 @@ file = %{
 h = JSON.parse(file)
 
 p h
+
+def get_fuzzy_value(h,v)
+  fuzzy_value = nil    
+  if v.is_a? Numeric
+    fuzzy_value = FuzzyNumber.new([[v-0.0001,0],[v,1],[v+0.0001,0]]) 
+  elsif v.is_a? String
+    fuzzy = h["fuzzy_sets"].find{|f| f["name"]==v}
+    raise "Can not find valid fuzzy value  #{v}" if fuzzy.nil?
+    if fuzzy["polyline"] 
+      fuzzy_value = FuzzyNumber.new(fuzzy["polyline"])
+    elsif fuzzy["membership"]
+      fuzzy_value = FuzzySet.new(fuzzy["membership"])
+    else
+      raise "Fuzzy value #{v} not valid"
+    end
+  else
+    raise "Can not find fuzzy value #{v}"
+  end
+  return fuzzy_value
+end
+
+h["alternatives"].each do |a|
+  total_res = nil
+  h["criterions"][3]["rules"].each do |r|
+    rule_strength = 0
+    r["conditions"].each do |crit,condition|
+      fuzzy_value = get_fuzzy_value(h,a[crit])
+      fuzzy_cond  = get_fuzzy_value(h,condition) # to do loop
+      c = fuzzy_value & fuzzy_cond
+      rule_strength = [rule_strength, c.get_max_membership].min
+    end
+    rule_res = get_fuzzy_value(h,r["result"]).clip_membership(rule_strength)
+    if total_res.nil?
+      total_res = rule_res
+    else
+      total_res = total_res | rule_res
+    end
+  end
+  res = total_res.defuzzification
+  puts "#{res}"
+end
+
