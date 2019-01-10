@@ -71,5 +71,4 @@ class FuzzySet
     membership = scale.map{|x|[x,[self.get_membership(x),other.get_membership(x)].max]}
     FuzzySet.new(membership)    
   end
-  
 end
