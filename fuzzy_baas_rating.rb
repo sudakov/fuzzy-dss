@@ -14,10 +14,8 @@ alternative_2 = very_important * fair + rather_unimportant * good
 puts "alternative_2"
 puts alternative_2
 
-
 puts "alternative_1>=alternative_2"
 puts alternative_1>=alternative_2
-
 
 puts "alternative_2>=alternative_1"
 puts alternative_2>=alternative_1
