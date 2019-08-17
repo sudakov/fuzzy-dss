@@ -101,3 +101,31 @@ class FuzzyNumber:
         spolyline = repr(self.polyline)
         spolyline = spolyline[spolyline.find('['):-1]
         return f"FuzzyNumber({spolyline})"
+
+    def clip_membership( self, a ):
+        b = self.polyline[:,1].reshape(-1,1)
+        return FuzzyNumber(list(zip(self.polyline[:,0], np.min(np.insert(b,1,a,axis=1),axis=1))))
+
+    def get_max_membership(self):
+        return np.max(self.polyline[:,1])
+
+    def logic_operation(self, other, operation):
+        scale = self.prep_scale(other).reshape(-1,1)
+        mus = np.apply_along_axis(self.get_membership, 1, scale)
+        muo = np.apply_along_axis(other.get_membership, 1, scale)
+        polyline = np.hstack((scale, operation(np.vstack((mus,muo)),axis=0).reshape(-1,1)))
+        return FuzzyNumber(polyline)
+
+    def __and__(self, other):
+        return self.logic_operation(other, np.min)
+
+    def __or__(self, other):
+        return self.logic_operation(other, np.max)
+
+    def defuzzification(self):
+        a,b = self.get_ab(self.polyline[:-1].T, self.polyline[1:].T)
+        s1 = np.sum(a * (self.polyline[1:,0]**3 - self.polyline[:-1,0]**3)/3.0 + \
+             b * (self.polyline[1:,0]**2 - self.polyline[:-1,0]**2)/2.0)
+        s2 =  np.sum(0.5 * (self.polyline[1:,0] - self.polyline[:-1,0]) * \
+             (self.polyline[1:,1] + self.polyline[:-1,1]))
+        return s1 / s2
